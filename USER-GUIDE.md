@@ -202,15 +202,16 @@ This is the way to move your brain to another computer.
 
 The OpenCode plugin is already installed and loaded globally, so you don't need to start anything special.
 
-- While you work in OpenCode, the agent is instructed to notice durable knowledge — decisions, lessons, mistakes, project context — and save it to your brain.
-- Before saving, it searches your brain to avoid duplicates.
-- Every save asks for your approval (a permission prompt). Choose **Allow once** to approve just that memory, or **Allow always** to stop being asked.
-- You can also ask explicitly: *"save that decision to my brain"* or *"what do I already know about SQLite?"*
-- The three tools are `brain_save_memory`, `brain_search` and `brain_link_memories`.
+- The brain is loaded automatically into every OpenCode request. Even a brand-new session on an old project starts with your recent memories and known entities already in context.
+- The agent searches the brain first whenever past knowledge could matter, then can save, update, link or delete knowledge without asking.
+- It proactively captures decisions, lessons, mistakes and durable project context.
+- There are **no approval prompts** — the plugin has full control by design.
+- You can also ask explicitly: *"save that decision to my brain"*, *"what do I already know about SQLite?"*, or *"update my memory about the backup policy"*.
+- The six tools are `brain_save_memory`, `brain_search`, `brain_link_memories`, `brain_add_entity`, `brain_update_memory` and `brain_delete_memory`.
+
+If you want confirmation before writes, change `fullControl` to `false` in the plugin options, or change the `brain.save` permission effect from `allow` to `ask` in `~/.config/opencode/opencode.json`. A backup of the original config is saved as `opencode.json.backup-brain-plugin`.
 
 If the brain server isn't running, the plugin starts it automatically from the built app. If that fails, run `npm run dev` in the project folder and reload OpenCode with `/reload`.
-
-To disable approval prompts, edit `~/.config/opencode/opencode.json` and change the `brain.save` permission effect from `ask` to `allow`. A backup of the original config is saved as `opencode.json.backup-brain-plugin`.
 
 ## 15. Keyboard and accessibility
 

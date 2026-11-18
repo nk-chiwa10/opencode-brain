@@ -72,38 +72,46 @@ A V2 OpenCode plugin lives at `plugins/opencode-brain`. It is registered in the 
 OpenCode config (`~/.config/opencode/opencode.json`) so it loads in every session:
 
 ```jsonc
-"plugins": ["C:/Users/mcmadueno/opencode-brain/plugins/opencode-brain"],
+"plugins": [
+  {
+    "package": "C:/Users/mcmadueno/opencode-brain/plugins/opencode-brain",
+    "options": {
+      "baseUrl": "http://127.0.0.1:3001",
+      "brainRoot": "C:/Users/mcmadueno/opencode-brain",
+      "autoStart": true,
+      "fullControl": true
+    }
+  }
+],
 "permissions": [
-  { "action": "brain.save", "resource": "*", "effect": "ask" }
+  { "action": "brain.save", "resource": "*", "effect": "allow" },
+  { "action": "brain.read", "resource": "*", "effect": "allow" }
 ]
 ```
 
-It exposes three tools (callable directly or via Code Mode as `tools.brain.*`):
+It exposes six tools (callable directly or via Code Mode as `tools.brain.*`):
 
 | Tool | Purpose |
 | --- | --- |
-| `brain_save_memory` | Save a decision / lesson / mistake / conversation / project context. Creates missing entities by name. Requires approval. |
-| `brain_search` | Search existing memories and entities before saving. |
+| `brain_save_memory` | Save a decision / lesson / mistake / conversation / project context. Creates missing entities by name. |
+| `brain_search` | Search existing memories and entities. |
 | `brain_link_memories` | Link two memories as related. |
+| `brain_add_entity` | Add an entity to the graph. |
+| `brain_update_memory` | Edit an existing memory. |
+| `brain_delete_memory` | Remove a memory (recorded in the timeline). |
 
-A `context` hook instructs the agent to capture durable knowledge proactively. Saving always
-passes through `permission.assert` with the `brain.save` action, so the default policy asks for
-approval. Change the permission rule to `allow` if you want silent capture.
+A `context` hook loads a snapshot of the brain (recent memories + known entities) into **every
+model request**, so even a fresh session on an old project starts with memory intact. It also
+instructs the agent to search the brain first whenever past knowledge could matter and to capture
+durable decisions, lessons and mistakes proactively.
+
+With `fullControl: true` the plugin skips `permission.assert`, and the global `brain.save` /
+`brain.read` rules are `allow`, so no approval prompts appear. Set `fullControl: false` or change
+the permission effect to `ask` if you want confirmation before writes.
 
 The plugin talks to the brain's REST API at `http://127.0.0.1:3001`. If the server isn't running,
-it starts the built server (`dist/server/index.js`) automatically; set `autoStart: false` in plugin
-options to disable that. Plugin options can be passed via the object form in `opencode.json`:
-
-```jsonc
-{
-  "package": "C:/Users/mcmadueno/opencode-brain/plugins/opencode-brain",
-  "options": {
-    "baseUrl": "http://127.0.0.1:3001",
-    "brainRoot": "C:/Users/mcmadueno/opencode-brain",
-    "autoStart": true
-  }
-}
-```
+it starts the built server (`dist/server/index.js`) automatically; set `autoStart: false` in the
+plugin options shown above to disable that.
 
 ### Design system
 OLED dark theme, IBM Plex Sans for UI and JetBrains Mono for data/labels, green primary
