@@ -239,21 +239,27 @@ export default Plugin.define({
             sessionID: 'plugin', messageID: 'plugin', id: 'brain.search',
           });
           const { query, kind = 'all' } = input as { query: string; kind?: string };
-          const needle = query.toLowerCase();
+          const tokens = query.toLowerCase().split(/[^a-z0-9]+/).filter((t) => t.length > 1);
+          const score = (text: string) =>
+            tokens.reduce((total, token) => total + (text.includes(token) ? 1 : 0), 0);
           const results: string[] = [];
           if (kind !== 'entities') {
             const memories = await api<BrainMemory[]>('/api/memories');
             results.push(...memories
-              .filter((m) => `${m.title} ${m.content} ${m.type} ${m.tags.join(' ')}`.toLowerCase().includes(needle))
+              .map((m) => ({ m, score: score(`${m.title} ${m.content} ${m.type} ${m.tags.join(' ')}`.toLowerCase()) }))
+              .filter((entry) => entry.score > 0)
+              .sort((a, b) => b.score - a.score)
               .slice(0, 10)
-              .map((m) => `MEMORY ${m.id} [${m.type}] ${m.title} (${m.updated_at.slice(0, 10)}): ${brief(m.content, 220)}`));
+              .map(({ m }) => `MEMORY ${m.id} [${m.type}] ${m.title} (${m.updated_at.slice(0, 10)}): ${brief(m.content, 220)}`));
           }
           if (kind !== 'memories') {
             const entities = await api<BrainEntity[]>('/api/entities');
             results.push(...entities
-              .filter((e) => `${e.name} ${e.type}`.toLowerCase().includes(needle))
+              .map((e) => ({ e, score: score(`${e.name} ${e.type}`.toLowerCase()) }))
+              .filter((entry) => entry.score > 0)
+              .sort((a, b) => b.score - a.score)
               .slice(0, 10)
-              .map((e) => `ENTITY ${e.id} [${e.type}] ${e.name}`));
+              .map(({ e }) => `ENTITY ${e.id} [${e.type}] ${e.name}`));
           }
           return { content: results.length ? results.join('\n') : `No OpenCode Brain results for "${query}".` };
         },
