@@ -62,6 +62,47 @@ src/
       Intelligence.tsx   Duplicate clusters + related-memory suggestions
       Inspector.tsx      Inspect / edit entities, memories, relationships
       Modal.tsx          Create dialogs
+  plugins/opencode-brain/
+    src/index.ts         V2 OpenCode plugin: tools, context hook, permissions, auto-start
+```
+
+## OpenCode integration (plugin)
+
+A V2 OpenCode plugin lives at `plugins/opencode-brain`. It is registered in the global
+OpenCode config (`~/.config/opencode/opencode.json`) so it loads in every session:
+
+```jsonc
+"plugins": ["C:/Users/mcmadueno/opencode-brain/plugins/opencode-brain"],
+"permissions": [
+  { "action": "brain.save", "resource": "*", "effect": "ask" }
+]
+```
+
+It exposes three tools (callable directly or via Code Mode as `tools.brain.*`):
+
+| Tool | Purpose |
+| --- | --- |
+| `brain_save_memory` | Save a decision / lesson / mistake / conversation / project context. Creates missing entities by name. Requires approval. |
+| `brain_search` | Search existing memories and entities before saving. |
+| `brain_link_memories` | Link two memories as related. |
+
+A `context` hook instructs the agent to capture durable knowledge proactively. Saving always
+passes through `permission.assert` with the `brain.save` action, so the default policy asks for
+approval. Change the permission rule to `allow` if you want silent capture.
+
+The plugin talks to the brain's REST API at `http://127.0.0.1:3001`. If the server isn't running,
+it starts the built server (`dist/server/index.js`) automatically; set `autoStart: false` in plugin
+options to disable that. Plugin options can be passed via the object form in `opencode.json`:
+
+```jsonc
+{
+  "package": "C:/Users/mcmadueno/opencode-brain/plugins/opencode-brain",
+  "options": {
+    "baseUrl": "http://127.0.0.1:3001",
+    "brainRoot": "C:/Users/mcmadueno/opencode-brain",
+    "autoStart": true
+  }
+}
 ```
 
 ### Design system

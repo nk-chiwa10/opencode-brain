@@ -198,7 +198,21 @@ This is the way to move your brain to another computer.
 
 ---
 
-## 14. Keyboard and accessibility
+## 14. Using it automatically from OpenCode
+
+The OpenCode plugin is already installed and loaded globally, so you don't need to start anything special.
+
+- While you work in OpenCode, the agent is instructed to notice durable knowledge — decisions, lessons, mistakes, project context — and save it to your brain.
+- Before saving, it searches your brain to avoid duplicates.
+- Every save asks for your approval (a permission prompt). Choose **Allow once** to approve just that memory, or **Allow always** to stop being asked.
+- You can also ask explicitly: *"save that decision to my brain"* or *"what do I already know about SQLite?"*
+- The three tools are `brain_save_memory`, `brain_search` and `brain_link_memories`.
+
+If the brain server isn't running, the plugin starts it automatically from the built app. If that fails, run `npm run dev` in the project folder and reload OpenCode with `/reload`.
+
+To disable approval prompts, edit `~/.config/opencode/opencode.json` and change the `brain.save` permission effect from `ask` to `allow`. A backup of the original config is saved as `opencode.json.backup-brain-plugin`.
+
+## 15. Keyboard and accessibility
 
 - `Tab` moves through controls; focus is always visible with a 2px outline.
 - List items and graph nodes support `Enter` and `Space` to select.

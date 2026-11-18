@@ -1,0 +1,14 @@
+{
+  "name": "opencode-brain-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "OpenCode plugin that saves decisions, lessons and mistakes into OpenCode Brain.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": ["src"],
+  "dependencies": {
+    "@opencode/plugin": "latest"
+  }
+}
