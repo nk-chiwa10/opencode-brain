@@ -72,6 +72,7 @@ export default Plugin.define({
               cwd: brainRoot,
               stdout: 'ignore',
               stderr: 'ignore',
+              windowsHide: true,
               env: { ...process.env, OPENCODE_BRAIN_ROOT: brainRoot },
             });
           } else {
@@ -79,6 +80,7 @@ export default Plugin.define({
               cwd: brainRoot,
               detached: true,
               stdio: 'ignore',
+              windowsHide: true,
             });
             child.on('error', (error) => { details += error.message; });
             child.unref();
