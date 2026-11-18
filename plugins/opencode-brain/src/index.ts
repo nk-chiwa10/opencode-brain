@@ -58,17 +58,39 @@ export default Plugin.define({
               `OpenCode Brain server build is missing at ${entry}. Run "npm run build" in ${brainRoot}.`,
             );
           }
-          const child = spawn(process.execPath, [entry], {
-            cwd: brainRoot,
-            detached: true,
-            stdio: 'ignore',
-          });
-          child.unref();
-          for (let attempt = 0; attempt < 25; attempt += 1) {
+          let details = '';
+          const runtime = globalThis as typeof globalThis & {
+            Bun?: { spawn: (command: string[], options: Record<string, unknown>) => unknown };
+          };
+          // process.execPath is the OpenCode CLI inside plugins, so use an explicit Node binary.
+          const nodeBin = String(
+            process.env.OPENCODE_BRAIN_NODE
+            ?? (process.env.ProgramFiles ? `${process.env.ProgramFiles}/nodejs/node.exe` : 'node'),
+          );
+          if (runtime.Bun) {
+            runtime.Bun.spawn([nodeBin, entry], {
+              cwd: brainRoot,
+              stdout: 'ignore',
+              stderr: 'ignore',
+              env: { ...process.env, OPENCODE_BRAIN_ROOT: brainRoot },
+            });
+          } else {
+            const child = spawn(nodeBin, [entry], {
+              cwd: brainRoot,
+              detached: true,
+              stdio: 'ignore',
+            });
+            child.on('error', (error) => { details += error.message; });
+            child.unref();
+          }
+          for (let attempt = 0; attempt < 40; attempt += 1) {
             await wait(250);
             if (await healthy()) return;
           }
-          throw new Error(`OpenCode Brain did not start at ${base}. Start it manually and try again.`);
+          const hint = details.trim().slice(0, 400);
+          throw new Error(
+            `OpenCode Brain did not start at ${base}. ${hint ? `Details: ${hint}` : 'Start it manually and try again.'}`,
+          );
         })().finally(() => {
           starting = undefined;
         });
